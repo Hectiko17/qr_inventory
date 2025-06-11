@@ -25,9 +25,13 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL,
         name TEXT NOT NULL,
+        category TEXT NOT NULL,
         description TEXT NOT NULL,
-        price REAL NOT NULL,
+        brand TEXT NOT NULL,
+        model TEXT NOT NULL,
+        status TEXT NOT NULL,
         quantity INTEGER NOT NULL
       )
     ''');
