@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'models/product.dart';
 import 'helpers/database_helper.dart';
 
@@ -211,6 +212,50 @@ class _MyHomePageState extends State<MyHomePage> {
     _quantityController.clear();
   }
 
+  void _showQRDialog(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Código QR - ${product.name}'),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: 250,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  QrImageView(
+                    data: '''
+                    Código: ${product.code}
+                    Nombre: ${product.name}
+                    Categoría: ${product.category}
+                    Marca: ${product.brand}
+                    Modelo: ${product.model}
+                    Estado: ${product.status}
+                    Cantidad: ${product.quantity}
+                    Descripción: ${product.description}
+                    ''',
+                    version: QrVersions.auto,
+                    size: 200.0,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('${product.brand} ${product.model}'),
+                  Text('Código: ${product.code}'),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -237,7 +282,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text('Estado: ${product.status}'),
                 ],
               ),
-              trailing: Text('Cant: ${product.quantity}'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Cant: ${product.quantity}'),
+                  IconButton(
+                    icon: const Icon(Icons.qr_code),
+                    onPressed: () => _showQRDialog(product),
+                  ),
+                ],
+              ),
             ),
           );
         },
