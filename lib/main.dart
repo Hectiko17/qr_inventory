@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'models/product.dart';
 import 'helpers/database_helper.dart';
+import 'qr_scan_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,7 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showAddProductDialog() {
     showDialog(
       context: context,
-      builder: (context) {
+      barrierDismissible: false, // Evita que se cierre al tocar fuera
+      builder: (dialogContext) {
+        // Cambiamos a dialogContext para tener referencia específica
         return AlertDialog(
           title: const Text('Agregar Nuevo Equipo'),
           content: SingleChildScrollView(
@@ -77,14 +80,73 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextFormField(
-                    controller: _codeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Código',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Campo requerido' : null,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _codeController,
+                          decoration: const InputDecoration(
+                            labelText: 'Código',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) =>
+                              value?.isEmpty ?? true ? 'Campo requerido' : null,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.qr_code_scanner),
+                        tooltip: 'Escanear QR',
+                        onPressed: () async {
+                          final result = await Navigator.push<String>(
+                            dialogContext, // Usamos dialogContext en lugar de context
+                            MaterialPageRoute(
+                              builder: (context) => const QRScanPage(),
+                            ),
+                          );
+                          if (result != null) {
+                            final lines = result.split('\n');
+                            for (final line in lines) {
+                              final parts = line.trim().split(':');
+                              if (parts.length == 2) {
+                                final field = parts[0].trim();
+                                final value = parts[1].trim();
+                                setState(() {
+                                  switch (field) {
+                                    case 'Código':
+                                      _codeController.text = value;
+                                      break;
+                                    case 'Nombre':
+                                      _nameController.text = value;
+                                      break;
+                                    case 'Categoría':
+                                      _categoryController.text = value;
+                                      break;
+                                    case 'Descripción':
+                                      _descriptionController.text = value;
+                                      break;
+                                    case 'Marca':
+                                      _brandController.text = value;
+                                      break;
+                                    case 'Modelo':
+                                      _modelController.text = value;
+                                      break;
+                                    case 'Estado':
+                                      _statusController.text = value;
+                                      break;
+                                    case 'Cantidad':
+                                      final numValue = value.replaceAll(
+                                          RegExp(r'[^0-9]'), '');
+                                      _quantityController.text = numValue;
+                                      break;
+                                  }
+                                });
+                              }
+                            }
+                          }
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
